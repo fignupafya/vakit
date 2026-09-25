@@ -11,7 +11,7 @@
 T.C. Diyanet İşleri Başkanlığı verileriyle namaz vakitleri:<br>
 içinde bulunduğunuz vakit, canlı geri sayım ve bütün yılın takvimi.
 
-### [Uygulamayı aç →](https://fignupafya.github.io/fpsalah/)
+### [Uygulamayı aç →](https://fignupafya.github.io/vakit/)
 
 <img src="app/assets/screenshots/desktop-light.png" width="820" alt="Masaüstünde Vakit: şu an öğle vakti; 13:01'de girdi, 16:24'te ikindiyle bitiyor; 1 sa 13 dk kaldı">
 

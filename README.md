@@ -11,7 +11,7 @@
 Prayer times from the Presidency of Religious Affairs of Türkiye (Diyanet):<br>
 the prayer period you are in, a live countdown and a year-round calendar.
 
-### [Open the app →](https://fignupafya.github.io/fpsalah/)
+### [Open the app →](https://fignupafya.github.io/vakit/)
 
 <img src="app/assets/screenshots/desktop-light.png" width="820" alt="Vakit on a desktop: it is Öğle (noon prayer) time, which started at 13:01 and ends at 16:24 with İkindi; 1 h 13 min left">
 
