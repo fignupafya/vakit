@@ -1,144 +1,141 @@
 <div align="center">
 
-**English** · [Türkçe](README.tr.md)
+**Türkçe** · [English](README.en.md)
 
 <br>
 
-<img src="app/assets/icon-192.png" width="88" height="88" alt="Vakit icon">
+<img src="app/assets/icon-192.png" width="88" height="88" alt="Vakit simgesi">
 
 # Vakit
 
-Prayer times from the Presidency of Religious Affairs of Türkiye (Diyanet):<br>
-the prayer period you are in, a live countdown and a year-round calendar.
+T.C. Diyanet İşleri Başkanlığı verileriyle namaz vakitleri:<br>
+içinde bulunduğunuz vakit, canlı geri sayım ve bütün yılın takvimi.
 
-### [Open the app →](https://fignupafya.github.io/vakit/)
+### [Uygulamayı aç →](https://fignupafya.github.io/vakit/)
 
-<img src="app/assets/screenshots/desktop-light.png" width="820" alt="Vakit on a desktop: it is Öğle (noon prayer) time, which started at 13:01 and ends at 16:24 with İkindi; 1 h 13 min left">
+<img src="app/assets/screenshots/desktop-light.png" width="820" alt="Masaüstünde Vakit: şu an öğle vakti; 13:01'de girdi, 16:24'te ikindiyle bitiyor; 1 sa 13 dk kaldı">
 
 </div>
 
-## What it does
+## Neler yapar
 
-- **Where you are in the day.** The top of the screen shows the prayer period you are in (for example *Öğle*),
-  when it started, when it ends and what comes next, with a live countdown. One glance answers
-  "which prayer time is it, until when, and how long is left".
-- **Finds you.** On first launch it asks for your location and picks the nearest official Diyanet
-  prayer-time point. Districts without their own entry use the province centre, and the app tells you so.
-  When you travel, it offers to switch.
-- **Calendar.** Any month or a whole year, with Hijri dates and Fridays marked. Print a year and every
-  month lands on its own page.
-- **Installable (PWA).** Add it to your home screen: it opens like an app and keeps working offline with
-  the last downloaded times.
-- **Themes.** System, light, dark, or *follow the sun*: light after sunrise, dark once the evening prayer begins.
-- **Ramadan-aware.** Iftar and sahur labels, a countdown to iftar, and the day of Ramadan.
-- **Nothing to install on a server.** Plain HTML, CSS and JavaScript modules: no build step, no packages, no tracking.
-
-The interface is in Turkish.
+- **Günün neresindesiniz?** Ekranın üstünde içinde bulunduğunuz vakit (ör. *Öğle vakti*), ne zaman girdiği,
+  ne zaman çıkacağı ve sıradaki vakit yazar; yanında da canlı geri sayım. Tek bakışta şu soruların cevabı:
+  hangi vakitteyiz, ne zamana kadar, ne kadar kaldı.
+- **Konumunuzu bulur.** İlk açılışta konum izni ister ve Diyanet'in en uygun vakit noktasını seçer. Kendi kaydı
+  olmayan ilçelerde il merkezi kullanılır ve bu size söylenir. Başka bir şehre gittiğinizde yeni yere geçmeyi önerir.
+- **Takvim.** İstediğiniz ay ya da bütün yıl; hicrî tarihler ve cumalar işaretli. Yılı yazdırınca her ay
+  ayrı sayfaya çıkar.
+- **Uygulama olarak yüklenir (PWA).** Ana ekrana ekleyin: uygulama gibi açılır, internet yokken de son
+  indirilen vakitlerle çalışır.
+- **Temalar.** Sistem, açık, koyu ya da *güneşe göre*: güneş doğunca açık, akşam vakti girince koyu.
+- **Ramazan.** İftar ve sahur etiketleri, iftara kalan süre ve Ramazan'ın kaçıncı günü olduğu.
+- **Sunucuya kurulacak bir şey yok.** Düz HTML, CSS ve JavaScript modülleri: derleme adımı, paket ya da izleme kodu yok.
 
 <p align="center">
-  <img src="app/assets/screenshots/mobile-dark.png" height="380" alt="On a phone, dark theme: Akşam (evening prayer) time, 43 min left until Yatsı">
+  <img src="app/assets/screenshots/mobile-dark.png" height="380" alt="Telefonda koyu tema: akşam vakti, yatsıya 43 dakika var">
   &nbsp;&nbsp;
-  <img src="app/assets/screenshots/focus-dark.png" height="380" alt="Focus layout for a wall screen or second monitor">
+  <img src="app/assets/screenshots/focus-dark.png" height="380" alt="Duvar ekranı ya da ikinci monitör için Odak düzeni">
 </p>
 
 <p align="center">
-  <img src="app/assets/screenshots/calendar-light.png" width="820" alt="Calendar page showing the whole month with Hijri dates">
+  <img src="app/assets/screenshots/calendar-light.png" width="820" alt="Takvim sayfası: hicrî tarihlerle bütün ay">
 </p>
 
-## Install it on your phone
+## Telefona yükleme
 
-| Device | How |
+| Cihaz | Nasıl |
 |---|---|
-| Android (Chrome, Edge, Samsung Internet) | Open the link, then choose **Install app** from the prompt or the ⋮ menu. The app also offers it under *Ayarlar → Uygulama*. |
-| iPhone / iPad (Safari) | Tap **Share**, then **Add to Home Screen**. |
-| Desktop (Chrome, Edge) | Click the install icon in the address bar. |
+| Android (Chrome, Edge, Samsung Internet) | Bağlantıyı açın; çıkan öneriden ya da ⋮ menüsünden **Uygulamayı yükle**'yi seçin. Uygulama bunu *Ayarlar → Uygulama* altında da sunar. |
+| iPhone / iPad (Safari) | **Paylaş** düğmesine, ardından **Ana Ekrana Ekle**'ye dokunun. |
+| Bilgisayar (Chrome, Edge) | Adres çubuğundaki yükleme simgesine tıklayın. |
 
-## How it works
+## Nasıl çalışır
 
 ```
-prayer-time API (adapter) → service + cache → state → view model → page
-browser location → place names → the provider's list of locations
+vakit API'si (adapter) → servis + önbellek → durum → görünüm modeli → sayfa
+tarayıcı konumu → yer adları → veri kaynağındaki konum
 ```
 
-- It is a static site: the `app/` folder is the whole app. GitHub Pages serves it; there is no backend.
-- Prayer times come from [ezanvakti.imsakiyem.com](https://ezanvakti.imsakiyem.com), a community API that
-  republishes Diyanet's data. The app talks to it through an **adapter**, so switching to another source
-  (for example Diyanet's official Awqat Salah API) means writing one adapter and changing one line in `config.js`.
-- Downloaded months are kept in the browser for 30 days, so normal use makes only a few requests a day.
-  A service worker keeps the app itself available offline.
-- **Location and privacy:** coordinates are rounded to about 100 m and sent to
-  [BigDataCloud](https://www.bigdatacloud.com)'s free reverse-geocoding service, only to learn the province
-  and district names. The names are then matched against Diyanet's list. Nothing else leaves the device.
+- Statik bir sitedir: `app/` klasörü uygulamanın tamamıdır. GitHub Pages onu sunar; arka uç yoktur.
+- Vakitler, Diyanet verisini yeniden yayımlayan gönüllü bir API'den,
+  [ezanvakti.imsakiyem.com](https://ezanvakti.imsakiyem.com)'dan gelir. Uygulama ona bir **adapter** üzerinden
+  bağlanır; başka bir kaynağa (ör. Diyanet'in resmî Awqat Salah API'si) geçmek için bir adapter yazıp
+  `config.js`'te tek satırı değiştirmek yeter.
+- İndirilen aylar tarayıcıda 30 gün saklanır; normal kullanımda günde birkaç istekten fazlası gitmez.
+  Service worker uygulamanın kendisini de internetsiz açılabilir tutar.
+- **Konum ve gizlilik:** Koordinat yaklaşık 100 m'ye yuvarlanıp yalnızca il ve ilçe adını öğrenmek için
+  [BigDataCloud](https://www.bigdatacloud.com)'un ücretsiz servisine gönderilir; bu adlar Diyanet'in listesiyle
+  eşleştirilir. Cihazdan başka hiçbir şey çıkmaz.
 
-## Run it locally
+## Bilgisayarda çalıştırma
 
 ```bash
 node serve.mjs
 ```
 
-Then open <http://127.0.0.1:5317>. On Windows you can double-click `Baslat.bat` instead.
-Node.js is only needed for this tiny static server; it has no packages. Any static file server pointed
-at `app/` works too. Opening `index.html` straight from disk doesn't work, because browsers don't run
-ES modules from `file://`.
+Ardından <http://127.0.0.1:5317> adresini açın. Windows'ta bunun yerine `Baslat.bat`'a çift tıklayabilirsiniz.
+Node.js yalnızca bu küçük yerel sunucu için gerekir; paketi yoktur. `app/` klasörünü sunan herhangi bir statik
+sunucu da iş görür. `index.html` dosyası doğrudan açılamaz, çünkü tarayıcılar `file://` üzerinden modül çalıştırmaz.
 
-## Project structure
+## Klasör yapısı
 
 ```
-app/                     the whole web app (published to GitHub Pages)
+app/                     web uygulamasının tamamı (GitHub Pages'e yayımlanır)
   index.html
-  manifest.webmanifest   PWA: name, icons, shortcuts
-  sw.js                  service worker: offline copy of the app
-  styles/                tokens.css (colours, type) · base · components · layouts · print
+  manifest.webmanifest   PWA: ad, simgeler, kısayollar
+  sw.js                  service worker: uygulamanın internetsiz kopyası
+  styles/                tokens.css (renkler, yazılar) · base · components · layouts · print
   src/
-    app.js               composition root: the only place where layers meet
-    config.js            data source, location service, defaults
-    router.js            #/ (Today) · #/takvim · #/takvim/2026-09 · #/takvim/2026
-    core/                logic that knows neither the UI nor any API
-      schedule.js          which period is it, what's next, how long is left (pure function)
-      prayer-service.js    wraps the data source with a cache (months and whole years)
-    providers/           adapters for prayer-time APIs
-      contract.js          the provider contract and the data model
-      imsakiyem.js         ezanvakti.imsakiyem.com (in use)
-      ezanvakti.js         ezanvakti.emushaf.net (alternative)
-    location/            browser location → place names → provider location
-    state/               user settings (kept in the browser)
-    ui/                  view model, shell, pages (Today: Ferah and Odak layouts; Calendar), components
-tools/                   icon and screenshot generators
-serve.mjs                local static server (Node.js built-ins only)
+    app.js               kompozisyon kökü: katmanlar yalnızca burada birleşir
+    config.js            veri kaynağı, konum servisi, varsayılanlar
+    router.js            #/ (Bugün) · #/takvim · #/takvim/2026-09 · #/takvim/2026
+    core/                ne arayüzü ne API'yi bilen mantık
+      schedule.js          hangi vakitteyiz, sıradaki ne, ne kadar kaldı (saf fonksiyon)
+      prayer-service.js    veri kaynağını önbellekle sarar (ay ve bütün yıl)
+    providers/           vakit API'leri için adapter'lar
+      contract.js          sağlayıcı sözleşmesi ve veri modeli
+      imsakiyem.js         ezanvakti.imsakiyem.com (kullanılan)
+      ezanvakti.js         ezanvakti.emushaf.net (yedek)
+    location/            tarayıcı konumu → yer adları → veri kaynağındaki konum
+    state/               kullanıcı ayarları (tarayıcıda saklanır)
+    ui/                  görünüm modeli, kabuk, sayfalar (Bugün: Ferah ve Odak; Takvim), bileşenler
+tools/                   simge ve ekran görüntüsü üreticileri
+serve.mjs                yerel sunucu (yalnızca Node.js'in kendi modülleri)
 ```
 
-## Extending it
+## Geliştirme
 
-**Use a different data source.** Write a factory in `app/src/providers/` that returns the object described
-in `contract.js` (`listCountries`, `listRegions`, `listDistricts`, `getTimes`, optional `searchDistricts`)
-and maps the API's responses to that model. Register it in `providers/index.js` and set `provider` in
-`config.js`. If it uses Diyanet's location IDs, set `idScheme: 'diyanet'` so saved locations stay valid.
-The official Awqat Salah API requires a username and password, which can't live in browser code, so it
-has to be added through a small server of your own.
+**Başka bir veri kaynağı kullanmak.** `app/src/providers/` altına, `contract.js`'te tarif edilen nesneyi
+(`listCountries`, `listRegions`, `listDistricts`, `getTimes`, isteğe bağlı `searchDistricts`) döndüren ve
+API'nin yanıtını bu modele çeviren bir fabrika yazın. `providers/index.js`'e ekleyip `config.js`'te `provider`
+alanını ona çevirin. Diyanet'in konum kimliklerini kullanıyorsa `idScheme: 'diyanet'` verin; kayıtlı konumlar
+geçerli kalır. Resmî Awqat Salah API'si kullanıcı adı ve şifre istediği için tarayıcıdaki koda konamaz;
+kendi küçük sunucunuz üzerinden eklenmesi gerekir.
 
-**Add a layout for the Today screen.** Add `{ id, label, hint, create(actions) }` in `app/src/ui/pages/`
-and list it in `TODAY_LAYOUTS` in `pages/index.js`; it shows up in Settings automatically. `create`
-returns `{ el, update(vm) }`, and `update` is called every second with the view model.
+**Bugün ekranına yeni bir düzen eklemek.** `app/src/ui/pages/` altına `{ id, label, hint, create(actions) }`
+nesnesini yazıp `pages/index.js`'teki `TODAY_LAYOUTS` listesine ekleyin; Ayarlar'da kendiliğinden görünür.
+`create`, `{ el, update(vm) }` döndürür; `update` her saniye görünüm modeliyle çağrılır.
 
-**Icons and screenshots.** `node tools/make-icons.mjs` regenerates the app icons.
-`node tools/screenshots.mjs` retakes the screenshots in this README (with the local server running).
+**Simgeler ve ekran görüntüleri.** `node tools/make-icons.mjs` uygulama simgelerini yeniden üretir.
+`node tools/screenshots.mjs` bu sayfadaki ekran görüntülerini yeniden çeker (yerel sunucu açıkken).
 
-## Handy URL parameters
+## İşe yarar adres parametreleri
 
-| Parameter | Effect |
+| Parametre | Ne yapar |
 |---|---|
-| `?now=2026-09-25T21:30` | Freeze the clock (location time): after the night prayer |
-| `?now=2026-03-10T17:45` | Ramadan: countdown to iftar |
-| `?geo=40.9903,29.0289` | Pretend to be in Kadıköy, which maps to İstanbul (centre) |
-| `?geo=deny` | Behave as if location permission was denied |
-| `?theme=dark` | Force a theme for this visit |
+| `?now=2026-09-25T21:30` | Saati sabitler (konumun saatiyle): yatsıdan sonrası |
+| `?now=2026-03-10T17:45` | Ramazan: iftara kalan süre |
+| `?geo=40.9903,29.0289` | Kadıköy'deymiş gibi davranır; İstanbul (merkez) seçilir |
+| `?geo=deny` | Konum izni reddedilmiş gibi davranır |
+| `?theme=dark` | O açılış için temayı zorlar |
 
-## Deployment
+## Yayın
 
-Every push to `main` publishes the `app/` folder to GitHub Pages
-(see [`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
+`main` dalına yapılan her gönderim `app/` klasörünü GitHub Pages'e yayımlar
+([`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
 
-## Disclaimer
+## Not
 
-Prayer times are published by the Presidency of Religious Affairs of Türkiye (T.C. Diyanet İşleri Başkanlığı).
-This is an independent project; it is not affiliated with or endorsed by Diyanet.
+Namaz vakitleri T.C. Diyanet İşleri Başkanlığı tarafından yayımlanır. Bu bağımsız bir projedir;
+Diyanet İşleri Başkanlığı ile bağlantısı yoktur ve onun tarafından onaylanmamıştır.
