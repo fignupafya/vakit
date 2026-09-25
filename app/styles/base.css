@@ -1,0 +1,97 @@
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 var(--step-0) / 1.5 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Arka plandaki hafif gökyüzü tonu: şu anki evreye (gece, tan, gündüz, akşam) göre değişir. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: min(80vh, 780px);
+  pointer-events: none;
+  background: radial-gradient(75% 95% at 82% -12%, color-mix(in oklab, var(--ambient) var(--ambient-strength), transparent), transparent 72%);
+}
+
+#app { position: relative; }
+
+h1, h2, h3 { text-wrap: balance; }
+
+button,
+input,
+select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection { background: color-mix(in oklab, var(--accent) 26%, transparent); }
+
+[hidden] { display: none !important; }
+
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tema değişirken renkler yumuşakça geçsin (yalnızca geçiş anında etkin). */
+html.theme-anim,
+html.theme-anim * {
+  transition: background-color 0.4s var(--ease-out), color 0.4s var(--ease-out), border-color 0.4s var(--ease-out) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Açılışta ya da ölümcül hatada gösterilen düz mesaj */
+.boot-msg {
+  max-width: 560px;
+  margin: 18vh auto 0;
+  padding: 0 24px;
+}
+.boot-msg h1 {
+  margin: 0 0 12px;
+  font: 400 2.25rem / 1.1 var(--font-display);
+  letter-spacing: -0.02em;
+}
+.boot-msg p { margin: 0; color: var(--ink-2); }

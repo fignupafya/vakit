@@ -1,0 +1,52 @@
+/* Yazdırma: Takvim sayfasında ay ya da bütün yıl (her ay ayrı sayfa), Bugün'de önümüzdeki günler.
+   Siyah beyaz ve sade. */
+@page { margin: 12mm; }
+
+:root,
+:root[data-theme] {
+  --bg: #fff;
+  --bg-raised: #fff;
+  --bg-sunken: #fff;
+  --ink: #000;
+  --ink-2: #222;
+  --ink-3: #555;
+  --rule: #c8c8c8;
+  --rule-strong: #000;
+  --accent: #000;
+  --today-bg: #ececec;
+}
+
+body { background: #fff; }
+body::before { display: none; }
+
+.topbar,
+.footer,
+.toasts,
+.sheet,
+.notice,
+.hero,
+.day,
+.cal__controls,
+.cal__jump,
+.link-more,
+.page--odak { display: none !important; }
+
+.page { max-width: none; padding: 0; }
+.upcoming { margin: 0; }
+.cal { padding-top: 0; }
+.cal__head { margin-bottom: 10pt; }
+.cal__title { font-size: 22pt; }
+.cal__block + .cal__block { margin-top: 0; break-before: page; }
+.cal__month { font-size: 16pt; }
+
+.table-wrap { overflow: visible; }
+.mt,
+.mt--compact { min-width: 0; font-size: 9pt; }
+.mt th,
+.mt td { padding: 3pt 5pt; }
+.mt thead th:first-child,
+.mt tbody th { position: static; }
+.mt tr { break-inside: avoid; }
+.mt tbody tr.is-past { color: #000; }
+.mt .col-hijri { display: table-cell !important; }
+.mt__wd { display: inline !important; margin-left: 4pt !important; }

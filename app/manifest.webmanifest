@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "Vakit — Namaz Vakitleri",
+  "short_name": "Vakit",
+  "description": "T.C. Diyanet İşleri Başkanlığı verileriyle namaz vakitleri: içinde bulunulan vakit, geri sayım ve yıllık takvim.",
+  "lang": "tr",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F3F0E8",
+  "theme_color": "#F3F0E8",
+  "categories": ["lifestyle", "utilities"],
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Takvim", "short_name": "Takvim", "description": "Aylık ve yıllık vakitler", "url": "./#/takvim" }
+  ],
+  "screenshots": [
+    { "src": "assets/screenshots/mobile-dark.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Şu anki vakit ve kalan süre" },
+    { "src": "assets/screenshots/desktop-light.png", "sizes": "1280x900", "type": "image/png", "form_factor": "wide", "label": "Bugün ekranı" }
+  ]
+}

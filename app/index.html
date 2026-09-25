@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Vakit</title>
+  <meta name="description" content="T.C. Diyanet İşleri Başkanlığı verileriyle namaz vakitleri: içinde bulunulan vakit, geri sayım ve yıllık takvim.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F3F0E8">
+
+  <!-- Uygulama olarak yükleme (PWA) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Vakit">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <script>
+    /* Tema, stiller yüklenmeden uygulanır; sayfa bir an bile yanlış renkte görünmez.
+       (?theme=light|dark yalnızca o açılış için temayı zorlar; ekran görüntüsü ve test içindir.) */
+    (function () {
+      var root = document.documentElement;
+      var prefersDark = function () { return !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); };
+      var theme = prefersDark() ? 'dark' : 'light';
+      try {
+        var saved = JSON.parse(localStorage.getItem('vakit:settings:v1') || '{}');
+        var mode = saved.theme || 'system';
+        if (mode === 'light' || mode === 'dark') theme = mode;
+        else if (mode === 'sun') theme = localStorage.getItem('vakit:theme:last') || theme;
+      } catch (e) { /* tarayıcı depolamaya izin vermiyor: sistem temasıyla devam */ }
+      var forced = /[?&]theme=(light|dark)\b/.exec(location.search);
+      root.setAttribute('data-theme', forced ? forced[1] : theme);
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap">
+
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/layouts.css">
+  <link rel="stylesheet" href="styles/print.css" media="print">
+
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <noscript>
+    <div class="boot-msg"><h1>JavaScript kapalı</h1><p>Vakit'in çalışması için tarayıcınızda JavaScript'in açık olması gerekir.</p></div>
+  </noscript>
+
+  <script>
+    /* Dosya olarak (file://) açıldığında tarayıcılar modülleri çalıştırmaz; kullanıcıya ne yapacağını söyle. */
+    if (location.protocol === 'file:') {
+      document.getElementById('app').innerHTML =
+        '<div class="boot-msg"><h1>Bu sayfa doğrudan açılamaz</h1>' +
+        '<p>Tarayıcılar dosya olarak açılan sayfalarda modülleri çalıştırmaz. Proje klasöründeki ' +
+        '<strong>Baslat.bat</strong> dosyasına çift tıklayın; Vakit tarayıcınızda kendiliğinden açılır.</p></div>';
+    }
+  </script>
+</body>
+</html>

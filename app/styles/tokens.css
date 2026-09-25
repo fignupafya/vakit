@@ -1,0 +1,100 @@
+/* ==========================================================================
+   Vakit — tasarım belirteçleri
+   Bütün renkler, yazı tipleri ve ölçüler burada. Yeni bir tema ya da arayüz
+   seçeneği eklemek için yalnızca bu değişkenleri yeniden tanımlamak yeter.
+   ========================================================================== */
+
+:root {
+  --font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --step--2: 0.75rem;
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-3: clamp(1.75rem, 1.25rem + 1.5vw, 2.375rem);
+  --step-display: clamp(3.75rem, 2.2rem + 6.2vw, 7rem);
+  --step-count: clamp(2.5rem, 1.7rem + 3.2vw, 4.25rem);
+
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+
+  /* Yatay telefonda çentiğe denk gelmesin diye güvenli alan payı da hesaba katılır. */
+  --gutter: max(clamp(16px, 4vw, 40px), env(safe-area-inset-left), env(safe-area-inset-right));
+  --maxw: 1160px;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 180ms;
+}
+
+/* ---------- Açık tema: sıcak kâğıt, koyu mürekkep, firuze vurgu ---------- */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #F3F0E8;
+  --bg-raised: #FAF8F3;
+  --bg-sunken: #E9E4D8;
+  --ink: #1D1B17;
+  --ink-2: #545046;
+  --ink-3: #74706A;
+  --rule: #DDD6C8;
+  --rule-strong: #C8BFAE;
+
+  --accent: #0B6B66;
+  --accent-strong: #08524E;
+  --on-accent: #F7F5EF;
+  --signal: #BF4D26;
+
+  --shadow: 0 1px 0 rgb(29 27 23 / 0.04), 0 24px 56px -28px rgb(29 27 23 / 0.35);
+
+  /* Gökyüzü evreleri: gün çizelgesi ve arka plan tonu gerçek vakitlerden hesaplanır */
+  --sky-night: #3D4668;
+  --sky-twilight: #8A82AC;
+  --sky-dawn: #EBB693;
+  --sky-day: #CFE0E4;
+  --sky-dusk: #D98F71;
+  --tick: rgb(255 255 255 / 0.72);
+  --ambient-strength: 30%;
+}
+
+/* ---------- Koyu tema: gece mavisi-siyah, açık firuze ---------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0D1114;
+  --bg-raised: #141A1E;
+  --bg-sunken: #1A2126;
+  --ink: #EAE6DC;
+  --ink-2: #ABA69B;
+  --ink-3: #86827A;
+  --rule: #232A2F;
+  --rule-strong: #323B41;
+
+  --accent: #5FC4BA;
+  --accent-strong: #8AD8D0;
+  --on-accent: #06201E;
+  --signal: #F0906A;
+
+  --shadow: 0 1px 0 rgb(0 0 0 / 0.25), 0 28px 64px -24px rgb(0 0 0 / 0.75);
+
+  --sky-night: #0B1020;
+  --sky-twilight: #35345D;
+  --sky-dawn: #80594F;
+  --sky-day: #2B4A56;
+  --sky-dusk: #7B4B42;
+  --tick: rgb(255 255 255 / 0.32);
+  --ambient-strength: 42%;
+}
+
+:root {
+  --accent-soft: color-mix(in oklab, var(--accent) 12%, transparent);
+  --today-bg: color-mix(in oklab, var(--accent) 9%, var(--bg));
+
+  --ambient: transparent;
+}
+:root[data-phase="night"] { --ambient: var(--sky-night); }
+:root[data-phase="dawn"]  { --ambient: var(--sky-dawn); }
+:root[data-phase="day"]   { --ambient: var(--sky-day); }
+:root[data-phase="dusk"]  { --ambient: var(--sky-dusk); }
