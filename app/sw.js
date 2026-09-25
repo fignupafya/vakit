@@ -1,15 +1,18 @@
 /*
- * Vakit — service worker. Uygulamanın kendi dosyalarını saklar; internet yokken de açılır.
+ * Vakit — service worker. Uygulamanın kendi dosyalarını cihazda tutar; internet yokken de açılır.
  *
- *  • Uygulama dosyaları: önce ağ, olmazsa saklanan kopya. Yeni sürüm yayınlanınca hemen gelir;
+ *  • Uygulama dosyaları: önce ağ, olmazsa cihazdaki kopya. Yeni sürüm yayınlanınca hemen gelir;
  *    eski ve yeni dosyalar karışmaz.
- *  • Yazı tipleri: saklanan kopya hemen, arkada tazelenir.
+ *  • İlk açılışta sayfa, yüklediği bütün dosyaların listesini gönderir ("warm"); hepsi hemen kaydedilir.
+ *    Böylece uygulama ilk açılıştan sonra bile internetsiz çalışır.
+ *  • Yazı tipleri: cihazdaki kopya hemen, arkada tazelenir.
  *  • Vakit ve konum API'leri buradan geçmez; uygulama onları kendisi saklıyor.
  */
 
-const CACHE = 'vakit-v1';
+const CACHE = 'vakit-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './assets/icon-192.png', './assets/favicon.svg'];
 const NETWORK_TIMEOUT_MS = 4000;
+const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -22,12 +25,16 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'warm' && Array.isArray(event.data.urls)) event.waitUntil(warm(event.data.urls));
+});
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin === self.location.origin) event.respondWith(networkFirst(request));
-  else if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') event.respondWith(cacheFirstRefresh(request, event));
+  else if (FONT_HOSTS.includes(url.hostname)) event.respondWith(cacheFirstRefresh(request, event));
 });
 
 async function networkFirst(request) {
@@ -38,14 +45,15 @@ async function networkFirst(request) {
     return response;
   } catch {
     const navigation = request.mode === 'navigate';
-    const hit = (await cache.match(request, { ignoreSearch: navigation })) ?? (navigation ? await cache.match('./') : undefined);
+    const hit = (await cache.match(request, { ignoreSearch: navigation, ignoreVary: true }))
+      ?? (navigation ? await cache.match('./', { ignoreVary: true }) : undefined);
     return hit ?? Response.error();
   }
 }
 
 async function cacheFirstRefresh(request, event) {
   const cache = await caches.open(CACHE);
-  const hit = await cache.match(request);
+  const hit = await cache.match(request, { ignoreVary: true });
   const refresh = fetch(request)
     .then((response) => { if (response.ok) cache.put(request, response.clone()); return response; })
     .catch(() => hit);
@@ -54,6 +62,23 @@ async function cacheFirstRefresh(request, event) {
     return hit;
   }
   return (await refresh) ?? Response.error();
+}
+
+/** Sayfanın yüklediği dosyaları kaydeder (zaten kayıtlı olanları atlar). */
+async function warm(urls) {
+  const cache = await caches.open(CACHE);
+  await Promise.all(urls.map(async (href) => {
+    try {
+      const url = new URL(href);
+      const sameOrigin = url.origin === self.location.origin;
+      if (!sameOrigin && !FONT_HOSTS.includes(url.hostname)) return;
+      if (await cache.match(href, { ignoreVary: true })) return;
+      const response = await fetch(href, sameOrigin ? {} : { mode: 'cors', credentials: 'omit' });
+      if (response.ok) await cache.put(href, response);
+    } catch {
+      /* internet yoksa bir dahaki açılışta */
+    }
+  }));
 }
 
 function withTimeout(promise, ms) {

@@ -39,6 +39,13 @@ export const config = {
   /** Yer değişikliği önerisi: bu kadar uzaklaşınca, en fazla bu sıklıkla kontrol edilir. */
   travel: { minDistanceKm: 20, checkEveryMs: 3 * 3_600_000, snoozeMs: 7 * 24 * 3_600_000 },
 
+  /**
+   * İnternetsiz kullanım: internet varken seçili ilin bütün ilçelerinin `months` aylık vakitleri (bu ay
+   * dahil) arka planda indirilir. Kaynağın istek sınırını (5 dakikada 100) zorlamamak için istekler arasında
+   * `gapMs` beklenir. Süresi `keepExpiredMs`'ten daha önce dolmuş kayıtlar (geçmiş aylar, eski iller) silinir.
+   */
+  regionPrefetch: { months: 2, gapMs: 4000, keepExpiredMs: 90 * 24 * 3_600_000 },
+
   /** Önbellek süreleri (ms). Boş bırakılanlar core/prayer-service.js'teki varsayılanları kullanır. */
   cacheTtl: {},
 };

@@ -7,10 +7,11 @@ import { createPage, pageKey } from './pages/index.js';
 /**
  * Uygulama kabuğu: üst çubuk, etkin sayfa, alt bilgi ve bildirimler.
  * Hangi sayfanın gösterileceğine görünüm modeline bakarak karar verir.
+ * attribution: vakitlerin kaynağı (sağlayıcıdan), alt bilgide yazar.
  */
-export function createShell(actions) {
+export function createShell(actions, { attribution } = {}) {
   const topbar = createTopbar(actions);
-  const footer = createFooter();
+  const footer = createFooter(attribution);
   const toaster = createToaster();
   const outlet = h('main', { class: 'outlet', id: 'icerik' });
   const el = h('div', { class: 'shell' }, topbar.el, outlet, footer.el, toaster.el);

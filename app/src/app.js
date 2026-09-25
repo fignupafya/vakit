@@ -4,7 +4,7 @@ import { createProvider } from './providers/index.js';
 import { createCache } from './core/cache.js';
 import { createPrayerService } from './core/prayer-service.js';
 import { readJson, safeStorage, writeJson } from './core/storage.js';
-import { addDays, createClock, monthOf, monthsOfYear } from './core/time.js';
+import { addDays, addMonths, createClock, monthOf, monthsOfYear } from './core/time.js';
 import { LocateError } from './core/errors.js';
 import { createGeolocation, distanceKm } from './location/geolocation.js';
 import { createReverseGeocoder } from './location/reverse-geocoder.js';
@@ -133,10 +133,11 @@ export function startApp(root) {
       .finally(() => { if (generation === state.generation) render(); });
   }
 
-  /** Bugün, yarın ve önümüzdeki hafta; Takvim açıksa gösterilen ay ya da yıl. */
+  /** Bugün, yarın ve önümüzdeki hafta; Takvim açıksa gösterilen ay ya da yıl; arka planda ilin geri kalanı. */
   function syncData() {
     if (!state.location || !state.today) return;
     for (const iso of [state.today, addDays(state.today, 1), addDays(state.today, 6)]) ensureMonth(monthOf(iso));
+    scheduleRegionPrefetch();
     const route = state.route;
     if (route?.page !== 'calendar') return;
     if (route.mode === 'year') ensureYear(route.year);
@@ -225,43 +226,96 @@ export function startApp(root) {
   }
 
   /**
-   * Konumu cihaz bulduysa ve izin zaten verilmişse, açılışta başka bir yere gidilip gidilmediğine
-   * bakar; gidildiyse yeni yeri önerir (kendiliğinden değiştirmez). Seyrek çalışır, reddedilen
-   * öneri bir süre tekrar gösterilmez.
+   * Yer değişikliği önerisi. Seçili konum (elle seçilmiş olsa da, otomatik bulunmuş olsa da) kendiliğinden
+   * hiç değişmez. Öneri yalnızca il değişince çıkar: son bakıldığında bulunulan ilden (ilk seferde seçili
+   * ilden) başka bir ile geçildiyse ve seçili il zaten orası değilse. Bilerek başka bir il seçildiyse,
+   * oradan ayrılınmadıkça bir daha sorulmaz; aynı il içindeki ilçe farkı için de öneri çıkmaz. Konum izni
+   * önceden verilmemişse hiçbir şey sorulmaz. Seyrek çalışır; reddedilen il bir süre tekrar önerilmez.
    */
   async function checkTravel() {
     const loc = state.location;
-    if (!settings.get().travelCheck || loc?.source !== 'gps' || !loc.coords) return;
+    if (!settings.get().travelCheck || !loc?.regionId || navigator.onLine === false) return;
     const memo = readJson(storage, TRAVEL_KEY, {});
     if (Date.now() - (memo.checkedAt ?? 0) < config.travel.checkEveryMs) return;
     if ((await geo.permission()) !== 'granted') return;
     writeJson(storage, TRAVEL_KEY, { ...memo, checkedAt: Date.now() });
 
     let coords;
-    let result;
     try {
       coords = await geo.getPosition({ maxAgeMs: 30 * 60_000, timeoutMs: 10_000 });
-      if (distanceKm(coords, loc.coords) < config.travel.minDistanceKm) return;
+    } catch {
+      return;
+    }
+    // Son bakılan yerden pek uzaklaşılmadıysa il de değişmemiştir: yer adını yeniden sormaya gerek yok.
+    const last = memo.last;
+    if (last?.coords && distanceKm(coords, last.coords) < config.travel.minDistanceKm) return;
+
+    let result;
+    try {
       result = await locator.locate(coords);
     } catch {
       return;
     }
+    if (state.location?.id !== loc.id) return; // bu arada konum elle değiştirildiyse karışma
+    const regionId = result.region?.id ?? result.location?.regionId ?? null;
+    writeJson(storage, TRAVEL_KEY, { ...readJson(storage, TRAVEL_KEY, {}), last: { coords: roundCoords(coords), regionId } });
     const target = result.location;
-    if (!target || state.location?.id !== loc.id) return;
-    if (target.id === loc.id) {
-      settings.set({ location: { ...loc, coords: roundCoords(coords) } });
-      return;
-    }
-    if (memo.dismissedId === target.id && Date.now() - (memo.dismissedAt ?? 0) < config.travel.snoozeMs) return;
+    const previous = last?.regionId ?? loc.regionId;
+    if (!target || !regionId || regionId === previous || regionId === loc.regionId) return; // il değişmedi
+
+    const snooze = readJson(storage, TRAVEL_KEY, {});
+    if (snooze.dismissedRegion === regionId && Date.now() - (snooze.dismissedAt ?? 0) < config.travel.snoozeMs) return;
 
     const name = placeName(target.name, target.countryId);
     const region = placeName(target.regionName, target.countryId);
-    shell.toast(`Başka bir yerde görünüyorsunuz: ${name === region ? name : `${name}, ${region}`}.`, {
+    shell.toast(`Başka bir ilde görünüyorsunuz: ${name === region ? name : `${name}, ${region}`}.`, {
       key: 'travel',
       duration: 0,
       actions: [['Buraya geç', () => { selectLocation(target, { source: 'gps', coords: roundCoords(coords) }); announce(result); }]],
-      onDismiss: () => writeJson(storage, TRAVEL_KEY, { ...readJson(storage, TRAVEL_KEY, {}), dismissedId: target.id, dismissedAt: Date.now() }),
+      onDismiss: () => writeJson(storage, TRAVEL_KEY, { ...readJson(storage, TRAVEL_KEY, {}), dismissedRegion: regionId, dismissedAt: Date.now() }),
     });
+  }
+
+  /* ------------------------ il içinde internetsiz ------------------------ */
+
+  /**
+   * İnternet varken seçili ilin bütün ilçelerinin bu ayki ve gelecek ayki vakitlerini (ve il/ilçe
+   * listelerini) arka planda indirir. Böylece internet yokken de il içinde ilçe değiştirilebilir;
+   * başka bir ile geçmek internet ister. Önbellekte taze olanlar atlanır; kaynağın istek sınırını
+   * zorlamamak için istekler arasında beklenir. İl değişirse yarıda bırakılır.
+   */
+  let regionRun = null;
+  let regionTimer = 0;
+  function scheduleRegionPrefetch(delayMs = 3000) {
+    clearTimeout(regionTimer);
+    regionTimer = setTimeout(prefetchRegion, delayMs);
+  }
+
+  async function prefetchRegion() {
+    const loc = state.location;
+    if (!loc?.regionId || !state.today || navigator.onLine === false) return;
+    const first = monthOf(state.today);
+    const months = Array.from({ length: config.regionPrefetch.months }, (_, i) => addMonths(first, i));
+    const key = `${provider.id}:${loc.regionId}:${first}`;
+    if (regionRun?.key === key) return; // bu il ve ay için çalışıyor ya da bitti
+    const run = { key };
+    regionRun = run;
+    try {
+      if (loc.countryId) await service.regions({ id: loc.countryId, name: loc.countryName }).catch(() => null);
+      const { value: districts } = await service.districts({ id: loc.regionId, name: loc.regionName, countryId: loc.countryId });
+      // Seçili ilçe önce.
+      const ordered = [...districts].sort((a, b) => (b.id === loc.id) - (a.id === loc.id));
+      for (const district of ordered) {
+        if (regionRun !== run) return; // bu arada başka bir il seçildi
+        const { meta } = await service.months(district.id, months);
+        if (meta.stale) throw meta.error; // internet gitti: gelince kaldığı yerden sürer
+        if (meta.from === 'network') await new Promise((resolve) => setTimeout(resolve, config.regionPrefetch.gapMs));
+      }
+      cache.sweep(config.regionPrefetch.keepExpiredMs); // çoktan eskimiş kayıtlar (geçmiş aylar, eski iller)
+    } catch (error) {
+      if (regionRun === run) regionRun = null;
+      if (error?.code === 'rate_limit') scheduleRegionPrefetch(5 * 60_000);
+    }
   }
 
   /* ---------------------------- eylemler ---------------------------- */
@@ -295,14 +349,18 @@ export function startApp(root) {
 
   function refresh() {
     cache.clear();
+    regionRun = null;
     resetData();
     syncData();
     render();
   }
 
+  // İnternet geri gelince: alınamayanları yeniden dene, ilin yarım kalan indirmesini sürdür.
+  window.addEventListener('online', () => actions.retry());
+
   /* ---------------------------- arayüz ---------------------------- */
 
-  const shell = createShell(actions);
+  const shell = createShell(actions, { attribution: provider.attribution });
   root.replaceChildren(shell.el);
 
   const picker = createLocationPicker({
@@ -344,7 +402,14 @@ export function startApp(root) {
     }, INSTALL_HINT_DELAY_MS);
   }
 
-  const panel = createSettingsPanel({ settings, layouts: listTodayLayouts(), installer, onRefresh: refresh, app: config.app });
+  const panel = createSettingsPanel({
+    settings,
+    layouts: listTodayLayouts(),
+    installer,
+    onRefresh: refresh,
+    app: config.app,
+    attribution: provider.attribution,
+  });
   document.body.append(picker.el, panel.el);
   if (installer.state === 'ios') scheduleInstallHint();
 

@@ -36,6 +36,14 @@ export function createCache(storage = safeStorage(), { now = () => Date.now() } 
       return writeJson(storage, PREFIX + key, rec);
     },
 
+    /** Süresi `graceMs`'ten daha önce dolmuş kayıtları siler (geçmiş aylar, artık kullanılmayan yerler). */
+    sweep(graceMs) {
+      for (const k of keys()) {
+        const expires = readJson(storage, k, null)?.x;
+        if (!Number.isFinite(expires) || now() > expires + graceMs) storage.removeItem(k);
+      }
+    },
+
     clear() {
       for (const k of keys()) storage.removeItem(k);
     },

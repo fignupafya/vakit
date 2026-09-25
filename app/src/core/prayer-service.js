@@ -54,6 +54,40 @@ export function createPrayerService({ provider, cache, ttl = {} }) {
     });
   }
 
+  /**
+   * Art arda gelen ayların vakitleri, aylara bölünmüş: [{ ym, days }]. Tek istekle alınır ve her ay
+   * ayrı önbelleğe yazılır; böylece aylık görünüm de aynı veriyi kullanır. Hepsi önbellekte tazeyse
+   * istek atılmaz.
+   * @param {string[]} yms  sıralı, art arda aylar; ör. ['2026-09', '2026-10']
+   */
+  function months(districtId, yms) {
+    const hits = yms.map((ym) => cache.get(monthKey(districtId, ym)));
+    const fromCache = (stale, error) => ({
+      value: yms.map((ym, i) => ({ ym, days: hits[i]?.value ?? [] })),
+      meta: { from: 'cache', savedAt: Math.min(...hits.filter(Boolean).map((h) => h.savedAt)), stale, error },
+    });
+    if (hits.every((h) => h && !h.stale)) return Promise.resolve(fromCache(false));
+
+    const from = monthRange(yms[0]).from;
+    const to = monthRange(yms[yms.length - 1]).to;
+    return once(keyOf(`times:${districtId}:${from}:${to}`), async () => {
+      try {
+        const days = sanitizeDays(await provider.getTimes(districtId, { from, to }), from, to);
+        const byMonth = new Map(yms.map((ym) => [ym, []]));
+        for (const day of days) byMonth.get(day.date.slice(0, 7))?.push(day);
+        const value = yms.map((ym) => {
+          const list = byMonth.get(ym);
+          cache.set(monthKey(districtId, ym), list, monthTtl(list, ym));
+          return { ym, days: list };
+        });
+        return { value, meta: { from: 'network', savedAt: Date.now() } };
+      } catch (error) {
+        if (hits.some(Boolean)) return fromCache(true, error);
+        throw error;
+      }
+    });
+  }
+
   return {
     provider,
     countries: () => load('countries', () => provider.listCountries(), T.places),
@@ -75,38 +109,10 @@ export function createPrayerService({ provider, cache, ttl = {} }) {
       );
     },
 
-    /**
-     * Bir yılın vakitleri, aylara bölünmüş: [{ ym, days }]. Tek istekle alınır ve her ay ayrı
-     * önbelleğe yazılır; böylece aylık görünüm de aynı veriyi kullanır.
-     */
-    year(districtId, year) {
-      const months = monthsOfYear(year);
-      const hits = months.map((ym) => cache.get(monthKey(districtId, ym)));
-      const fromCache = (stale, error) => ({
-        value: months.map((ym, i) => ({ ym, days: hits[i]?.value ?? [] })),
-        meta: { from: 'cache', savedAt: Math.min(...hits.filter(Boolean).map((h) => h.savedAt)), stale, error },
-      });
-      if (hits.every((h) => h && !h.stale)) return Promise.resolve(fromCache(false));
+    months,
 
-      return once(keyOf(`year:${districtId}:${year}`), async () => {
-        const from = `${year}-01-01`;
-        const to = `${year}-12-31`;
-        try {
-          const days = sanitizeDays(await provider.getTimes(districtId, { from, to }), from, to);
-          const byMonth = new Map(months.map((ym) => [ym, []]));
-          for (const day of days) byMonth.get(day.date.slice(0, 7))?.push(day);
-          const value = months.map((ym) => {
-            const list = byMonth.get(ym);
-            cache.set(monthKey(districtId, ym), list, monthTtl(list, ym));
-            return { ym, days: list };
-          });
-          return { value, meta: { from: 'network', savedAt: Date.now() } };
-        } catch (error) {
-          if (hits.some(Boolean)) return fromCache(true, error);
-          throw error;
-        }
-      });
-    },
+    /** Bir yılın vakitleri, aylara bölünmüş: [{ ym, days }] (tek istek). */
+    year: (districtId, year) => months(districtId, monthsOfYear(year)),
   };
 }
 

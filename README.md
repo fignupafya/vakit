@@ -11,6 +11,9 @@
 T.C. Diyanet İşleri Başkanlığı verileriyle namaz vakitleri:<br>
 içinde bulunduğunuz vakit, canlı geri sayım ve bütün yılın takvimi.
 
+<sub>Vakitler Diyanet'ten doğrudan değil, Diyanet verisini yeniden yayımlayan
+<a href="https://ezanvakti.imsakiyem.com">ezanvakti.imsakiyem.com</a> API'si üzerinden alınır.</sub>
+
 ### [Uygulamayı aç →](https://fignupafya.github.io/vakit/)
 
 <img src="app/assets/screenshots/desktop-light.png" width="820" alt="Masaüstünde Vakit: şu an öğle vakti; 13:01'de girdi, 16:24'te ikindiyle bitiyor; 1 sa 13 dk kaldı">
@@ -23,11 +26,14 @@ içinde bulunduğunuz vakit, canlı geri sayım ve bütün yılın takvimi.
   ne zaman çıkacağı ve sıradaki vakit yazar; yanında da canlı geri sayım. Tek bakışta şu soruların cevabı:
   hangi vakitteyiz, ne zamana kadar, ne kadar kaldı.
 - **Konumunuzu bulur.** İlk açılışta konum izni ister ve Diyanet'in en uygun vakit noktasını seçer. Kendi kaydı
-  olmayan ilçelerde il merkezi kullanılır ve bu size söylenir. Başka bir şehre gittiğinizde yeni yere geçmeyi önerir.
+  olmayan ilçelerde il merkezi kullanılır ve bu size söylenir. Seçtiğiniz konum kendiliğinden değişmez; başka
+  bir ile gittiğinizde yeni ili önerir.
 - **Takvim.** İstediğiniz ay ya da bütün yıl; hicrî tarihler ve cumalar işaretli. Yılı yazdırınca her ay
   ayrı sayfaya çıkar.
-- **Uygulama olarak yüklenir (PWA).** Ana ekrana ekleyin: uygulama gibi açılır, internet yokken de son
-  indirilen vakitlerle çalışır.
+- **Uygulama olarak yüklenir (PWA).** Ana ekrana ekleyin: uygulama gibi açılır, internet yokken de açılır.
+- **İnternet yokken il içinde çalışır.** İnternet varken seçtiğiniz ilin bütün ilçelerinin bu ayki ve gelecek
+  ayki vakitleri arka planda indirilir; internet yokken de il içinde ilçe değiştirebilirsiniz. Başka bir ile
+  geçmek için internet gerekir.
 - **Temalar.** Sistem, açık, koyu ya da *güneşe göre*: güneş doğunca açık, akşam vakti girince koyu.
 - **Ramazan.** İftar ve sahur etiketleri, iftara kalan süre ve Ramazan'ın kaçıncı günü olduğu.
 - **Sunucuya kurulacak bir şey yok.** Düz HTML, CSS ve JavaScript modülleri: derleme adımı, paket ya da izleme kodu yok.
@@ -63,7 +69,9 @@ tarayıcı konumu → yer adları → veri kaynağındaki konum
   bağlanır; başka bir kaynağa (ör. Diyanet'in resmî Awqat Salah API'si) geçmek için bir adapter yazıp
   `config.js`'te tek satırı değiştirmek yeter.
 - İndirilen aylar tarayıcıda 30 gün saklanır; normal kullanımda günde birkaç istekten fazlası gitmez.
-  Service worker uygulamanın kendisini de internetsiz açılabilir tutar.
+  Seçili ilin öteki ilçeleri arka planda, istekler arasında 4 saniye beklenerek indirilir (kaynağın sınırı
+  5 dakikada 100 istek); önbellekte taze olanlar atlanır, il değişirse indirme bırakılır. Service worker
+  uygulama dosyalarını ilk açılışta kaydeder; uygulama internetsiz de açılır.
 - **Konum ve gizlilik:** Koordinat yaklaşık 100 m'ye yuvarlanıp yalnızca il ve ilçe adını öğrenmek için
   [BigDataCloud](https://www.bigdatacloud.com)'un ücretsiz servisine gönderilir; bu adlar Diyanet'in listesiyle
   eşleştirilir. Cihazdan başka hiçbir şey çıkmaz.
@@ -137,5 +145,6 @@ nesnesini yazıp `pages/index.js`'teki `TODAY_LAYOUTS` listesine ekleyin; Ayarla
 
 ## Not
 
-Namaz vakitleri T.C. Diyanet İşleri Başkanlığı tarafından yayımlanır. Bu bağımsız bir projedir;
-Diyanet İşleri Başkanlığı ile bağlantısı yoktur ve onun tarafından onaylanmamıştır.
+Namaz vakitleri T.C. Diyanet İşleri Başkanlığı tarafından yayımlanır; bu uygulama onları Diyanet'ten doğrudan
+değil, [ezanvakti.imsakiyem.com](https://ezanvakti.imsakiyem.com) API'si üzerinden alır. Bu bağımsız bir projedir;
+ne Diyanet İşleri Başkanlığı ne de ezanvakti.imsakiyem.com ile bağlantısı vardır, onlar tarafından onaylanmamıştır.

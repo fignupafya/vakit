@@ -17,7 +17,7 @@ const INSTALL_TEXT = {
 };
 
 /** Yan panel: tema, Bugün ekranının düzeni, geri sayım, konum ve uygulama olarak yükleme. */
-export function createSettingsPanel({ settings, layouts, installer, onRefresh, app }) {
+export function createSettingsPanel({ settings, layouts, installer, onRefresh, app, attribution = {} }) {
   const section = (id, title, ...content) =>
     h('section', { class: 'set', 'aria-labelledby': id }, h('h3', { class: 'set__title', id }, title), ...content);
 
@@ -47,12 +47,17 @@ export function createSettingsPanel({ settings, layouts, installer, onRefresh, a
     section('set-location', 'Konum',
       travel.row,
       h('p', { class: 'hint' },
-        'Konumunuzu kendiniz bulduysanız, uygulama açılışta başka bir şehre geçip geçmediğinize bakar ve yeni yeri önerir. ',
-        'Konumunuz yalnızca il ve ilçe adını bulmak için BigDataCloud\'a gönderilir; uygulama onu yalnızca bu tarayıcıda saklar.')),
+        'Seçtiğiniz konum kendiliğinden değişmez. Başka bir ile gittiğinizde, konum izni daha önce verilmişse, ',
+        'uygulama açılışta yeni ili önerir. Konumunuz yalnızca il ve ilçe adını bulmak için BigDataCloud\'a gönderilir; ',
+        'uygulama onu yalnızca bu tarayıcıda saklar.')),
     section('set-about', 'Hakkında',
       h('p', { class: 'about' },
         `${app.name} ${app.version}. Namaz vakitleri T.C. Diyanet İşleri Başkanlığı'nın yayımladığı verilerdir. `,
-        'Vakitler bir kez alınıp tarayıcıda saklanır; internet yokken de son alınanlar gösterilir.'),
+        attribution.via
+          ? `Uygulama onları Diyanet'ten doğrudan değil, bu verileri yeniden yayımlayan ${attribution.via} API'sinden alır. `
+          : '',
+        'İnternet varken seçili ilin bütün ilçelerinin bu ayki ve gelecek ayki vakitleri tarayıcıda saklanır; ',
+        'internet yokken de il içinde ilçe değiştirebilirsiniz. Başka bir ile geçmek için internet gerekir.'),
       h('div', { class: 'set__row' },
         button('Vakitleri yenile', () => { onRefresh(); setText(refreshNote, 'Vakitler yeniden alınıyor.'); }),
         refreshNote)),

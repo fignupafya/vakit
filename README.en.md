@@ -11,6 +11,9 @@
 Prayer times from the Presidency of Religious Affairs of Türkiye (Diyanet):<br>
 the prayer period you are in, a live countdown and a year-round calendar.
 
+<sub>The times are not fetched from Diyanet directly but through
+<a href="https://ezanvakti.imsakiyem.com">ezanvakti.imsakiyem.com</a>, an API that republishes Diyanet's data.</sub>
+
 ### [Open the app →](https://fignupafya.github.io/vakit/)
 
 <img src="app/assets/screenshots/desktop-light.png" width="820" alt="Vakit on a desktop: it is Öğle (noon prayer) time, which started at 13:01 and ends at 16:24 with İkindi; 1 h 13 min left">
@@ -24,11 +27,14 @@ the prayer period you are in, a live countdown and a year-round calendar.
   "which prayer time is it, until when, and how long is left".
 - **Finds you.** On first launch it asks for your location and picks the nearest official Diyanet
   prayer-time point. Districts without their own entry use the province centre, and the app tells you so.
-  When you travel, it offers to switch.
+  The location you chose never changes by itself; when you are in another province, the app offers to
+  switch.
 - **Calendar.** Any month or a whole year, with Hijri dates and Fridays marked. Print a year and every
   month lands on its own page.
-- **Installable (PWA).** Add it to your home screen: it opens like an app and keeps working offline with
-  the last downloaded times.
+- **Installable (PWA).** Add it to your home screen: it opens like an app, and it opens offline too.
+- **Works offline within your province.** While online, this month's and next month's times for every district
+  of the selected province are downloaded in the background, so without internet you can still switch between
+  its districts. Switching to another province needs internet.
 - **Themes.** System, light, dark, or *follow the sun*: light after sunrise, dark once the evening prayer begins.
 - **Ramadan-aware.** Iftar and sahur labels, a countdown to iftar, and the day of Ramadan.
 - **Nothing to install on a server.** Plain HTML, CSS and JavaScript modules: no build step, no packages, no tracking.
@@ -65,7 +71,9 @@ browser location → place names → the provider's list of locations
   republishes Diyanet's data. The app talks to it through an **adapter**, so switching to another source
   (for example Diyanet's official Awqat Salah API) means writing one adapter and changing one line in `config.js`.
 - Downloaded months are kept in the browser for 30 days, so normal use makes only a few requests a day.
-  A service worker keeps the app itself available offline.
+  The other districts of the selected province are fetched in the background, 4 seconds apart (the source
+  allows 100 requests per 5 minutes); fresh months are skipped, and the download stops if you switch province.
+  A service worker stores the app's files on the first visit, so the app opens offline.
 - **Location and privacy:** coordinates are rounded to about 100 m and sent to
   [BigDataCloud](https://www.bigdatacloud.com)'s free reverse-geocoding service, only to learn the province
   and district names. The names are then matched against Diyanet's list. Nothing else leaves the device.
@@ -141,4 +149,5 @@ Every push to `main` publishes the `app/` folder to GitHub Pages
 ## Disclaimer
 
 Prayer times are published by the Presidency of Religious Affairs of Türkiye (T.C. Diyanet İşleri Başkanlığı).
-This is an independent project; it is not affiliated with or endorsed by Diyanet.
+This app does not fetch them from Diyanet directly but through the [ezanvakti.imsakiyem.com](https://ezanvakti.imsakiyem.com) API.
+This is an independent project; it is not affiliated with or endorsed by Diyanet or ezanvakti.imsakiyem.com.
